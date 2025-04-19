@@ -1,0 +1,154 @@
+﻿@model IEnumerable<MarketPlaceDomain.Model.Category>
+@{
+    ViewData["Title"] = "Категорії";
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="container mt-4 mb-5">
+    <div class="text-center mb-4 pb-2">
+        <h1 class="display-4 fw-bold mb-3" style="color: #EB5757;">Категорії</h1>
+        @if (isAdmin)
+        {
+            <a class="btn btn-danger rounded-pill px-4 py-2 shadow-sm"
+               asp-action="Create">
+                <i class="bi bi-plus-circle-fill me-2"></i>Нова категорія
+            </a>
+        }
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        @foreach (var item in Model)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <a asp-action="Details" asp-route-id="@item.Id" class="category-card-link">
+                    <div class="card h-100 border-0 shadow-sm category-card">
+                        <div class="card-img-top-wrapper text-center mt-3">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl"
+                                     alt="@item.Name"
+                                     class="category-img rounded"
+                                     style="height: 160px; width: 160px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="placeholder-img rounded d-flex align-items-center justify-content-center mx-auto"
+                                     style="height: 160px; width: 160px;">
+                                    <i class="bi bi-card-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-body text-center d-flex flex-column">
+                            <h5 class="card-title fw-bold mt-2 mb-3 flex-grow-1">@item.Name</h5>
+                            @if (isAdmin)
+                            {
+                                <div class="admin-actions mt-auto">
+                                    <a class="btn btn-outline-secondary btn-sm rounded-pill px-3 me-1 action-btn"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       title="Редагувати">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a class="btn btn-outline-danger btn-sm rounded-pill px-3 action-btn"
+                                       asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       title="Видалити">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .category-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+
+    .category-card {
+        transition: all 0.35s ease;
+        cursor: pointer;
+        background-color: #fff;
+        border-radius: 15px !important;
+        overflow: hidden;
+    }
+
+        .category-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+        }
+
+    .category-img {
+        transition: transform 0.35s ease;
+    }
+
+    .category-card:hover .category-img {
+        transform: scale(1.05);
+    }
+
+    .placeholder-img {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    .card-title {
+        font-size: 1.15rem;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+
+    .category-card:hover .card-title {
+        color: #EB5757;
+    }
+
+    .admin-actions {
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        height: 0;
+        overflow: hidden;
+    }
+
+    .category-card:hover .admin-actions {
+        opacity: 1;
+        height: auto;
+        margin-top: 10px;
+    }
+
+    .action-btn {
+        border-width: 1px;
+        transition: all 0.2s ease;
+    }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+
+    @@media (max-width: 768px) {
+        .category-img, .placeholder-img {
+            height: 140px;
+            width: 140px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    h1.display-4 {
+        background: linear-gradient(45deg, #f75e5e, #d62929);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700 !important;
+    }
+
+</style>

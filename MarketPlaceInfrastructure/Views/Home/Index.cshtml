@@ -1,8 +1,91 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Головна";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-banner position-relative overflow-hidden" style="height: 90vh;">
+    <div class="container h-100">
+        <div class="row h-100 align-items-center">
+            <div class="col-lg-6 text-center text-lg-start">
+                <h1 class="display-4 fw-bold mb-4">Знайди все, що тобі потрібно, в одному місці!</h1>
+                <p class="lead mb-4">Маркетплейс, який об'єднує продавців і покупців з усього світу. Легко знайти та продати товари без посередників.</p>
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary btn-lg px-4">Зареєструватися</a>
+                    <a href="/Categories" class="btn btn-outline-secondary btn-lg px-4">Категорії товарів</a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-image" style="background: url('/images/placeholder.jpg') center/cover; height: 500px; border-radius: 20px;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-5 display-5 fw-bold">Як це працює?</h2>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-primary text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; line-height: 60px;">
+                            <i class="bi bi-person-plus fs-4"></i>
+                        </div>
+                        <h5 class="card-title">1. Реєстрація</h5>
+                        <p class="card-text">Зареєструйтесь або увійдіть у свій акаунт</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-success text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; line-height: 60px;">
+                            <i class="bi bi-plus-square fs-4"></i>
+                        </div>
+                        <h5 class="card-title">2. Додайте товар</h5>
+                        <p class="card-text">Заповніть просту форму для публікації товару</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-warning text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; line-height: 60px;">
+                            <i class="bi bi-search fs-4"></i>
+                        </div>
+                        <h5 class="card-title">3. Переглядайте</h5>
+                        <p class="card-text">Знаходьте товари та здійснюйте покупки</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-danger text-white rounded-circle mx-auto mb-3" style="width: 60px; height: 60px; line-height: 60px;">
+                            <i class="bi bi-chat-dots fs-4"></i>
+                        </div>
+                        <h5 class="card-title">4. Спілкуйтесь</h5>
+                        <p class="card-text">Зв'яжіться з продавцем напряму для покупки</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hero-banner {
+        background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+</style>

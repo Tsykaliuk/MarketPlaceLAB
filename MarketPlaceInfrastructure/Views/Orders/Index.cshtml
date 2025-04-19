@@ -1,0 +1,115 @@
+﻿@model IEnumerable<MarketPlaceDomain.Model.Order>
+@using MarketPlaceDomain.Model
+@using MarketPlaceInfrastructure.Services
+@{
+    ViewData["Title"] = "Керування Замовленнями";
+}
+
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">Немає жодного замовлення в системі.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID Замовлення</th>
+                        <th>Дата</th>
+                        <th>Товар</th>
+                        <th>К-сть</th>
+                        <th>Сума</th>
+                        <th>Покупець</th>
+                        <th>Статус</th>
+                        <th class="text-end">Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-muted small">
+                                <span title="@item.Id">@item.Id.Substring(0, 8)...</span>
+                            </td>
+
+                            <td>
+                                @item.CreatedAt.ToString("dd.MM.yy HH:mm")
+                            </td>
+                            <td>
+                                @if (item.Product != null)
+                                {
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" title="@item.Product.Title">
+                                        @item.Product.Title?.Substring(0, Math.Min(item.Product.Title.Length, 35))@if (item.Product.Title?.Length > 35)
+                                        {
+                                            @Html.Raw("...")
+                                        }
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Товар видалено</span>
+                                }
+                            </td>
+
+                            <td>
+                                @item.Quantity
+                            </td>
+
+                            <td class="text-nowrap">
+                                @item.TotalPrice.ToString("N0") ₴
+                            </td>
+
+                            <td>
+                                @if (item.User != null)
+                                {
+                                    <span title="@item.User.Email">@item.User.UserName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">N/A</span>
+                                }
+                            </td>
+
+                            <td>
+                                <span class="badge @GetStatusBadgeClass(item.Status)">
+                                    @EnumExtensions.GetDisplayName(item.Status)
+                                </span>
+                            </td>
+
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Деталі">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning ms-1" title="Змінити статус">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger ms-1" title="Видалити">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Confirmed => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Canceled => "bg-secondary",
+            _ => "bg-light text-dark",
+        };
+    }
+}

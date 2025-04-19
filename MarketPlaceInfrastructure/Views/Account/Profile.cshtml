@@ -1,0 +1,304 @@
+﻿@using MarketPlaceInfrastructure.Services;
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Мій профіль";
+}
+
+
+<div class="container py-5">
+    <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile" type="button">
+                <i class="bi bi-person-circle me-2"></i>Профіль
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#products" type="button">
+                <i class="bi bi-box-seam me-2"></i>Мої товари
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#orders" type="button">
+                <i class="bi bi-cart-check me-2"></i>Замовлення
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#incoming-orders" type="button">
+                <i class="bi bi-inbox-fill me-2"></i>Мої продажі
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="profile">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-4"><i class="bi bi-info-circle me-2"></i>Особисті дані</h4>
+                    <dl class="row">
+                        <dt class="col-sm-3">Юзернейм:</dt>
+                        <dd class="col-sm-9">@Model.User?.UserName</dd>
+
+                        <dt class="col-sm-3">Електронна пошта:</dt>
+                        <dd class="col-sm-9">@Model.User?.Email</dd>
+
+                        <dt class="col-sm-3">Ім'я:</dt>
+                        <dd class="col-sm-9">@Model.User?.Name</dd>
+
+                        <dt class="col-sm-3">Прізвище:</dt>
+                        <dd class="col-sm-9">@Model.User?.Surname</dd>
+
+                        <dt class="col-sm-3">Номер телефону:</dt>
+                        <dd class="col-sm-9">@Model.User?.PhoneNumber</dd>
+
+                        @if (Model.Roles.Any())
+                        {
+                            <dt class="col-sm-3">Ролі:</dt>
+                            <dd class="col-sm-9">
+                                @string.Join(", ", Model.Roles)
+                            </dd>
+                        }
+                    </dl>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="products">
+            <h4 class="mb-4">Мої товари</h4>
+            @if (Model.MyProducts != null && Model.MyProducts.Any())
+            {
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+                    @foreach (var product in Model.MyProducts)
+                    {
+                        var imageUrl = product.Images?.FirstOrDefault()?.ImageUrl ?? "/images/noimage.jpeg";
+                        var statusClass = product.Status == ProductStatus.InStock ? "bg-success" : "bg-secondary";
+
+                        <div class="col">
+                            <div class="card h-100 shadow-sm product-card-profile">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
+                                    <img src="@imageUrl" class="card-img-top profile-product-image" alt="@product.Title">
+                                </a>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-truncate mb-2">
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="text-dark text-decoration-none">
+                                            @product.Title
+                                        </a>
+                                    </h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-primary fs-5">@product.Price.ToString("N0") ₴</span>
+                                        <span class="badge @statusClass">@product.Status.GetDisplayName()</span>
+                                    </div>
+                                    <div class="mt-auto">
+                                    </div>
+                                </div>
+
+                                <div class="card-footer bg-transparent border-top-0 pt-0">
+                                    <div class="d-flex justify-content-between align-items-center gap-2">
+                                        <a asp-controller="Products"
+                                           asp-action="Details"
+                                           asp-route-id="@product.Id"
+                                           class="btn btn-sm btn-outline-secondary flex-grow-1" title="Деталі">
+                                            <i class="bi bi-eye"></i> <span class="d-none d-md-inline">Деталі</span>
+                                        </a>
+                                        <div class="btn-group flex-shrink-0">
+                                            <a asp-controller="Products"
+                                               asp-action="Edit"
+                                               asp-route-id="@product.Id"
+                                               class="btn btn-sm btn-outline-primary" title="Змінити">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-controller="Products"
+                                               asp-action="Delete"
+                                               asp-route-id="@product.Id"
+                                               class="btn btn-sm btn-outline-danger" title="Видалити">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">Ви ще не додали жодного товару.</div>
+            }
+        </div>
+
+        <div class="tab-pane fade" id="orders">
+            @if (Model.MyOrders != null && Model.MyOrders.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Дата</th>
+                                <th>Товар</th>
+                                <th>К-сть</th>
+                                <th>Сума</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.MyOrders)
+                            {
+                                <tr>
+                                    <td>@order.CreatedAt.ToString("dd.MM.yyyy")</td>
+
+                                    <td>
+                                        @if (order.Product != null)
+                                        {
+                                            <div class="d-flex align-items-center">
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@order.ProductId" title="@order.Product.Title">
+                                                    @order.Product.Title?.Substring(0, Math.Min(order.Product.Title.Length, 40))@if (order.Product.Title?.Length > 40)
+                                                    {
+                                                        @Html.Raw("...")
+                                                    }
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Товар видалено</span>
+                                        }
+                                    </td>
+
+                                    <td>@order.Quantity</td>
+
+                                    <td class="text-nowrap">@order.TotalPrice.ToString("N0") ₴</td>
+
+                                    <td>
+                                        <span class="badge @GetStatusBadgeClass(order.Status)">
+                                            @EnumExtensions.GetDisplayName(order.Status)
+                                        </span>
+                                    </td>
+
+                                    <td class="text-nowrap">
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-info" title="Деталі замовлення">
+                                            <i class="bi bi-eye"></i> <span class="d-none d-md-inline">Деталі</span>
+                                        </a>
+                                        @if (order.Status == OrderStatus.Pending)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Скасувати замовлення" onclick="cancelOrder('@order.Id')">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">У вас ще немає замовлень.</div>
+            }
+        </div>
+
+        <div class="tab-pane fade" id="incoming-orders">
+            <h4 class="mb-4">Мої продажі (Вхідні замовлення)</h4>
+            @if (Model.IncomingOrders != null && Model.IncomingOrders.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Товар</th>
+                                <th>К-сть</th>
+                                <th>Сума</th>
+                                <th>Покупець</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.IncomingOrders)
+                            {
+                                <tr>
+                                    <td>@order.CreatedAt.ToString("dd.MM HH:mm")</td> 
+                                    <td>
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@order.ProductId" title="@order.Product?.Title">
+                                            <img src="@order.Product?.Images.FirstOrDefault().ImageUrl" style="width:30px; height:30px; object-fit:cover; margin-right: 5px;" />
+                                            @order.Product?.Title?.Substring(0, Math.Min(order.Product.Title.Length, 30)) 
+                                            @if (order.Product?.Title?.Length > 30)
+                                            {
+                                                @Html.Raw("...")
+                                            }
+                                        </a>
+                                    </td>
+                                    <td>@order.Quantity</td>
+                                    <td>@order.TotalPrice.ToString("N0") ₴</td>
+                                    <td>
+                                        @order.User?.UserName
+                                    </td>
+                                    <td><span class="badge @GetStatusBadgeClass(order.Status)">@EnumExtensions.GetDisplayName(order.Status)</span></td>
+                                    <td>
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-info" title="Деталі замовлення">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Confirmed) // Приклад умов
+                                        {
+                                            <a asp-controller="Orders" asp-action="EditSellerStatus" asp-route-id="@order.Id" class="btn btn-sm btn-outline-success ms-1" title="Обробити/Відправити">
+                                                <i class="bi bi-truck"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">У вас ще немає продажів.</div>
+            }
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .product-card-profile .profile-product-image {
+        height: 180px;
+        object-fit: cover;
+        width: 100%;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .product-card-profile:hover .profile-product-image {
+        opacity: 0.9;
+    }
+
+    .product-card-profile .card-title a:hover {
+        opacity: 0.9;
+    }
+
+    .product-card-profile .card-body {
+        flex-grow: 1;
+    }
+
+    .product-card-profile .text-primary {
+        color: #dc3545 !important;
+    }
+</style>
+
+@functions {
+    string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Confirmed => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Canceled => "bg-secondary",
+            _ => "bg-light text-dark",
+        };
+    }
+}

@@ -1,0 +1,207 @@
+﻿@{
+    ViewData["Title"] = "Статистика";
+}
+<div class="container mt-4 mb-5">
+    <h1 class="text-center mb-5">Статистика</h1>
+
+
+    <div class="row g-4 mb-4 justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div id="categoryProductChart" style="width: 100%; height: 450px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">Топ товарів за кількістю продажів</h5>
+                    <div id="topProductsQtyChart" style="width: 100%; height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">Топ товарів за доходом</h5>
+                    <div id="topProductsRevenueChart" style="width: 100%; height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div id="productStatusChart" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div id="orderStatusChart" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { packages: ['corechart', 'bar', 'line'] });
+        google.charts.setOnLoadCallback(drawAllCharts);
+
+        function drawAllCharts() {
+            drawCategoryProductChart();
+            drawOrderStatusChart();
+            drawTopProductsQtyChart();
+            drawTopProductsRevenueChart();
+            drawProductStatusChart();
+        }
+
+        function drawCategoryProductChart() {
+            fetch('/api/charts/categoryProductCount')
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to load category data'))
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        document.getElementById('categoryProductChart').innerHTML = '<div class="alert alert-light text-center">Немає даних по категоріях.</div>';
+                        return;
+                    }
+                    const dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('string', 'Категорія');
+                    dataTable.addColumn('number', 'Кількість продуктів');
+                    data.forEach(item => dataTable.addRow([item.categoryName, item.productCount]));
+
+                    const options = {
+                        title: 'Кількість продуктів по категоріях',
+                        pieHole: 0.4,
+                         legend: { position: 'bottom' }
+                    };
+                    const chart = new google.visualization.PieChart(document.getElementById('categoryProductChart'));
+                    chart.draw(dataTable, options);
+                })
+                .catch(error => {
+                     console.error('Error fetching category data:', error);
+                     document.getElementById('categoryProductChart').innerHTML = '<div class="alert alert-danger text-center">Помилка завантаження даних.</div>';
+                });
+        }
+    
+
+         function drawOrderStatusChart() {
+             fetch('/api/charts/orderStatusDistribution')
+                 .then(response => response.ok ? response.json() : Promise.reject('Failed to load order status'))
+                 .then(data => {
+                     if (!data || data.length === 0) {
+                        document.getElementById('orderStatusChart').innerHTML = '<div class="alert alert-light text-center">Немає даних про статуси замовлень.</div>';
+                        return;
+                    }
+                     const dataTable = new google.visualization.DataTable();
+                     dataTable.addColumn('string', 'Статус');
+                     dataTable.addColumn('number', 'Кількість');
+                     data.forEach(item => dataTable.addRow([item.statusName, item.count]));
+
+                     const options = {
+                         title: 'Розподіл замовлень за статусами',
+                         pieSliceText: 'percentage',
+                         legend: { position: 'right' }
+                     };
+                     const chart = new google.visualization.PieChart(document.getElementById('orderStatusChart'));
+                     chart.draw(dataTable, options);
+                 })
+                 .catch(error => {
+                     console.error('Error fetching order status data:', error);
+                     document.getElementById('orderStatusChart').innerHTML = '<div class="alert alert-danger text-center">Помилка завантаження даних.</div>';
+                 });
+         }
+
+        function drawTopProductsQtyChart() {
+             fetch('/api/charts/topProductsByQuantity?count=5')
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to load top products by quantity'))
+                .then(data => {
+                     if (!data || data.length === 0) {
+                        document.getElementById('topProductsQtyChart').innerHTML = '<div class="alert alert-light text-center">Немає даних про продажі товарів.</div>';
+                        return;
+                    }
+                    const dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('string', 'Товар');
+                    dataTable.addColumn('number', 'Продано одиниць');
+                    data.forEach(item => dataTable.addRow([item.productName, item.totalQuantity]));
+
+                    const options = {
+                        chartArea: { width: '60%', height: '70%' },
+                        hAxis: { title: 'Продано одиниць', minValue: 0 },
+                        vAxis: { title: 'Товар' },
+                        legend: { position: 'none' }
+                    };
+                    const chart = new google.visualization.BarChart(document.getElementById('topProductsQtyChart'));
+                    chart.draw(dataTable, options);
+                })
+                .catch(error => {
+                    console.error('Error fetching top products by quantity:', error);
+                     document.getElementById('topProductsQtyChart').innerHTML = '<div class="alert alert-danger text-center">Помилка завантаження даних.</div>';
+                });
+        }
+
+         function drawTopProductsRevenueChart() {
+            fetch('/api/charts/topProductsByRevenue?count=5')
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to load top products by revenue'))
+                .then(data => {
+                     if (!data || data.length === 0) {
+                        document.getElementById('topProductsRevenueChart').innerHTML = '<div class="alert alert-light text-center">Немає даних про дохід від товарів.</div>';
+                        return;
+                    }
+                    const dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('string', 'Товар');
+                     dataTable.addColumn('number', 'Дохід (₴)');
+                    data.forEach(item => dataTable.addRow([item.productName, item.totalRevenue]));
+
+                     const options = {
+                         chartArea: { width: '60%', height: '70%' },
+                         hAxis: { title: 'Дохід (₴)', minValue: 0, format: '₴#,##0.00' },
+                         vAxis: { title: 'Товар' },
+                         legend: { position: 'none' }
+                    };
+                    const chart = new google.visualization.BarChart(document.getElementById('topProductsRevenueChart'));
+                    chart.draw(dataTable, options);
+                 })
+                 .catch(error => {
+                    console.error('Error fetching top products by revenue:', error);
+                    document.getElementById('topProductsRevenueChart').innerHTML = '<div class="alert alert-danger text-center">Помилка завантаження даних.</div>';
+                });
+         }
+
+         function drawProductStatusChart() {
+              fetch('/api/charts/productStatusDistribution')
+                 .then(response => response.ok ? response.json() : Promise.reject('Failed to load product status'))
+                 .then(data => {
+                      if (!data || data.length === 0) {
+                        document.getElementById('productStatusChart').innerHTML = '<div class="alert alert-light text-center">Немає даних про статуси товарів.</div>';
+                        return;
+                    }
+                     const dataTable = new google.visualization.DataTable();
+                     dataTable.addColumn('string', 'Статус Товару');
+                     dataTable.addColumn('number', 'Кількість');
+                     data.forEach(item => dataTable.addRow([item.statusName, item.count]));
+
+                     const options = {
+                         title: 'Розподіл товарів за статусами',
+                         pieHole: 0.4,
+                         legend: { position: 'bottom' }
+                     };
+                     const chart = new google.visualization.PieChart(document.getElementById('productStatusChart'));
+                     chart.draw(dataTable, options);
+                 })
+                 .catch(error => {
+                    console.error('Error fetching product status data:', error);
+                     document.getElementById('productStatusChart').innerHTML = '<div class="alert alert-danger text-center">Помилка завантаження даних.</div>';
+                });
+         }
+    </script>
+}

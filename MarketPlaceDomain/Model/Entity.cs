@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MarketPlaceDomain.Model;
+﻿namespace MarketPlaceDomain.Model;
 
 public abstract class Entity
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString(); 
 }

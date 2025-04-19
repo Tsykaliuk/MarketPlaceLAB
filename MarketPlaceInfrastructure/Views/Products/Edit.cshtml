@@ -1,0 +1,193 @@
+﻿@using MarketPlaceDomain.Model
+@model MarketPlaceDomain.Model.Product
+@{
+    ViewData["Title"] = "Редагування продукту";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="card-title text-center mb-4">
+                        Редагування продукту
+                    </h2>
+                    <p class="text-center text-muted mb-4 h5">
+                        @Model.Title
+                    </p>
+
+                     @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" novalidate>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="CategoryId" />
+
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-semibold">Назва*</label>
+                            <input asp-for="Title" class="form-control" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Опис*</label>
+                            <textarea asp-for="Description" class="form-control" rows="5" required></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Price" class="form-label fw-semibold">Ціна*</label>
+                                <div class="input-group">
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" required />
+                                    <span class="input-group-text">₴</span>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Stock" class="form-label fw-semibold">Кількість</label>
+                                <input asp-for="Stock" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="Stock" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Status" class="form-label fw-semibold">Статус*</label>
+                                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProductStatus>()" required>
+                                    <option value="" disabled>-- Оберіть статус --</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        @if (Model.Images != null && Model.Images.Any())
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold d-block mb-2">Поточні зображення</label>
+                                <div class="current-images-grid">
+                                    @foreach (var img in Model.Images)
+                                    {
+                                        <div class="current-image-item">
+                                            <img src="@img.ImageUrl" alt="Product Image @(img.Id)" class="img-thumbnail current-image-thumb" />
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input" type="checkbox" name="RemoveImages" value="@img.Id" id="remove_@img.Id">
+                                                <label class="form-check-label small" for="remove_@img.Id">
+                                                    Видалити
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label for="newImages" class="form-label fw-semibold">Додати нові зображення</label>
+                            <input type="file" name="NewImages" id="newImages" class="form-control" accept="image/*" multiple />
+                            <small class="form-text text-muted mt-1 d-block">
+                                Вибрані файли будуть додані до існуючих (якщо ви не позначили їх для видалення).
+                            </small>
+                            <div id="newImagePreviewContainer" class="mt-2 d-flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i>Скасувати
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Зберегти зміни
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card-body {
+            background-color: #fff;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .text-danger.small {
+            font-size: 0.8em;
+        }
+
+        .current-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .current-image-item {
+            text-align: center;
+        }
+
+        .current-image-thumb {
+            max-width: 100%;
+            height: 100px;
+            object-fit: contain; /* Show full image */
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa; /* Light bg for contain */
+        }
+
+        .form-check {
+            padding-left: 1.5em;
+        }
+        .form-check-input {
+            float: none;
+            margin-left: -1.5em;
+        }
+
+        .form-check-label {
+            display: inline-block;
+        }
+
+        .img-thumbnail-preview {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+            padding: 2px;
+            border-radius: .25rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.getElementById('newImages')?.addEventListener('change', function(event) {
+            const previewContainer = document.getElementById('newImagePreviewContainer');
+            if (!previewContainer) return;
+
+            previewContainer.innerHTML = '';
+
+            if (this.files) {
+                Array.from(this.files).forEach(file => {
+                    if (!file.type.startsWith('image/')){ return; }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('img-thumbnail-preview');
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+    </script>
+}

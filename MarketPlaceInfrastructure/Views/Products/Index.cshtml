@@ -1,0 +1,270 @@
+﻿@using MarketPlaceInfrastructure.Services
+@using MarketPlaceDomain.Model
+@model IEnumerable<MarketPlaceDomain.Model.Product>
+
+@{
+    var currentSearchString = Context.Request.Query["searchString"];
+    var currentCategoryId = Context.Request.Query["categoryId"];
+    var currentView = ViewBag.CurrentView as string ?? "active";
+
+    ViewData["Title"] = currentView == "archive" ? "Архів товарів" : "Список товарів";
+
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var categories = ViewBag.Categories as List<MarketPlaceDomain.Model.Category>;
+}
+
+
+<div class="container py-4">
+
+    @if (TempData["ImportMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["ImportMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ImportError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ImportError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ExportError"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ExportError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 pb-2 border-bottom">
+        <div class="d-flex gap-2 flex-shrink-0">
+            <a asp-action="Index"
+               asp-route-searchString="@currentSearchString"
+               asp-route-categoryId="@currentCategoryId"
+               asp-route-view="active"
+               class="btn btn-sm @(currentView == "active" ? "btn-dark" : "btn-outline-secondary")"
+               title="Активні товари">
+                <i class="bi bi-list-ul"></i> <span class="d-none d-md-inline">Активні</span>
+            </a>
+            <a asp-action="Index"
+               asp-route-searchString="@currentSearchString"
+               asp-route-categoryId="@currentCategoryId"
+               asp-route-view="archive"
+               class="btn btn-sm @(currentView == "archive" ? "btn-dark" : "btn-outline-secondary")"
+               title="Архів">
+                <i class="bi bi-archive-fill"></i> <span class="d-none d-md-inline">Архів</span>
+            </a>
+        </div>
+        @* @if (User.IsInRole("Admin")) *@
+        <div class="ms-auto flex-shrink-0">
+            <a asp-action="Export" class="btn btn-sm btn-outline-success" title="Експорт в Excel">
+                <i class="bi bi-file-earmark-excel"></i> <span class="d-none d-md-inline">Експорт</span>
+            </a>
+        </div>
+    </div>
+
+    <h1 class="text-center mb-4">@ViewData["Title"]</h1>
+
+    <form method="get" asp-action="Index" class="mb-4 p-3 border rounded bg-light">
+        <input type="hidden" name="view" value="@currentView" />
+
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5 col-lg-6">
+                <label for="searchString" class="form-label visually-hidden">Пошук товару</label>
+                <input type="text" id="searchString" name="searchString"
+                       class="form-control"
+                       placeholder="Пошук товару за назвою"
+                       value="@currentSearchString" />
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <label for="categoryId" class="form-label visually-hidden">Категорія</label>
+                <select id="categoryId" name="categoryId" class="form-select">
+                    <option value="">Всі категорії</option>
+                    @if (categories != null)
+                    {
+                        foreach (var cat in categories)
+                        {
+                            <option value="@cat.Id" selected="@(cat.Id.ToString() == currentCategoryId)">
+                                @cat.Name
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3 col-lg-3 d-flex gap-2">
+                <button type="submit" class="btn btn-info flex-grow-1">
+                    <i class="bi bi-search"></i> <span class="d-none d-lg-inline">Пошук/Фільтр</span>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-file-earmark-arrow-up"></i> Імпорт Товарів з Excel
+        </div>
+        <div class="card-body">
+            <form asp-action="Import" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label for="file" class="form-label">Виберіть файл .xlsx:</label>
+                    <input type="file" name="file" id="file" class="form-control" accept=".xlsx" required />
+                    <div class="form-text">
+                        Файл повинен містити стовпці: <strong>Title</strong>, <strong>Price</strong>, <strong>Status</strong>, <strong>Stock</strong>, <strong>CategoryId</strong>, <strong>Description</strong>. CategoryId має існувати в базі даних.
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Завантажити та Імпортувати
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center mt-4">
+            @if (currentView == "archive")
+            {
+                <span>В архіві товарів не знайдено.</span>
+            }
+            else
+            {
+                <span>Активних товарів за вашим запитом не знайдено.</span>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var item in Model)
+            {
+
+                var statusClass = item.Status == ProductStatus.InStock ? "bg-success" : "bg-secondary";
+                var statusDisplayName = EnumExtensions.GetDisplayName(item.Status); // Або просто item.Status.ToString();
+
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        @if (item.Images != null && item.Images.Any())
+                        {
+                            <img src="@item.Images.First().ImageUrl"
+                                 class="card-img-top product-image"
+                                 alt="@item.Title"> @* Використовуємо Name замість Title *@
+                        }
+                        else
+                        {
+                            <div class="card-img-top product-image-placeholder d-flex align-items-center justify-content-center bg-light text-muted">
+                                <i class="bi bi-image" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-truncate">@item.Title</h5> @* Використовуємо Name замість Title *@
+                            <div class="d-flex justify-content-between align-items-center mb-2 text-muted small">
+                                <span class="badge bg-light text-dark border fw-normal">@item.Category?.Name</span>
+                                <span class="badge @statusClass">@statusDisplayName</span>
+                            </div>
+                            <h4 class="card-text mt-auto mb-2 text-danger fw-bold">@item.Price.ToString("N2") ₴</h4>
+                        </div>
+
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <a asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn btn-outline-primary btn-sm flex-grow-1">
+                                    <i class="bi bi-eye"></i> Деталі
+                                </a>
+
+                                @if (item.UserId == currentUserId || isAdmin)
+                                {
+                                    <div class="btn-group flex-shrink-0">
+                                        @if (item.UserId == currentUserId)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-outline-secondary" title="Редагувати">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+                                        <a asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-danger" title="Видалити">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .product-image, .product-image-placeholder {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-card {
+            transition: box-shadow 0.3s ease;
+        }
+
+            .product-card:hover {
+                box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+            }
+
+        .card-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+
+        .card-body {
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-top: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        .status{
+            border-radius: 7px;
+            padding: 2px 4px;
+            color: white;
+            font-size: 12px;
+        }
+        .status.instock{
+            background-color: green;
+        }
+
+        .status.not-instock {
+            background-color: red;
+        }
+
+        .product-card .card-img-top {
+            aspect-ratio: 4 / 3; /* Співвідношення сторін зображення */
+            object-fit: cover; /* Масштабування зображення */
+        }
+
+        .product-image-placeholder {
+            aspect-ratio: 4 / 3;
+        }
+
+        .product-card .card-title {
+            min-height: 2.5em; /* Зарезервувати місце для двох рядків назви */
+        }
+    </style>
+}

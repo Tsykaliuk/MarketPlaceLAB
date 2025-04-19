@@ -1,0 +1,91 @@
+﻿@model MarketPlaceDomain.Model.Order
+@using MarketPlaceInfrastructure.Services;
+@{
+    ViewData["Title"] = $"Зміна статусу замовлення #{Model.Id.Substring(0, 8)}...";
+    var currentStatusName = ViewBag.CurrentStatusName ?? EnumExtensions.GetDisplayName(Model.Status);
+    var statusesSelectList = ViewBag.Statuses as SelectList; // Отримуємо список доступних статусів
+    var formAction = User.IsInRole("Admin") ? "Edit" : "EditSellerStatus";
+}
+
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    Поточний статус: <span class="badge fs-6 @GetStatusBadgeClass(Model.Status)">@currentStatusName</span>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+
+                    <form asp-action="@formAction" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label for="statusSelect" class="form-label fw-bold">Новий статус замовлення:</label>
+                            <select name="status" id="statusSelect" class="form-select" asp-items="statusesSelectList">
+                                @if (statusesSelectList != null && statusesSelectList.Any())
+                                {
+                                    <option value="" disabled selected>-- Оберіть новий статус --</option>
+                                }
+                                else
+                                {
+                                    <option value="" disabled selected>-- Немає доступних статусів для зміни --</option>
+                                }
+                            </select>
+                            @Html.ValidationMessage("status", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Скасувати</a>
+                            <button type="submit" class="btn btn-primary" disabled="@(statusesSelectList == null || !statusesSelectList.Any())">
+                                <i class="bi bi-check-lg me-2"></i>Зберегти статус
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Інфо</h5>
+                    <p class="mb-1"><small>ID: @Model.Id</small></p>
+                    <p class="mb-1"><small>Дата: @Model.CreatedAt.ToString("g")</small></p>
+                    <p class="mb-1"><small>Товар: @Model.Product?.Title</small></p>
+                    <p class="mb-1"><small>Сума: @Model.TotalPrice.ToString("N2") ₴</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Confirmed => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Canceled => "bg-secondary",
+            _ => "bg-light text-dark",
+        };
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

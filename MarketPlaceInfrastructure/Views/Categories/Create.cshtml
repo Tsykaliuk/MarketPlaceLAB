@@ -1,0 +1,31 @@
+﻿@model MarketPlaceDomain.Model.Category
+
+@{
+    ViewData["Title"] = "Створення нової категорії";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Створення нової категорії</h2>
+        </div>
+        <div class="card-body">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Category Image</label>
+                    <input type="file" class="form-control" name="CategoryImage" accept="image/*" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Створити категорію</button>
+            </form>
+        </div>
+    </div>
+</div>

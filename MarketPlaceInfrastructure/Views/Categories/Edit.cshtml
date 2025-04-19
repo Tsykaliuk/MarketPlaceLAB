@@ -1,0 +1,54 @@
+﻿@model MarketPlaceDomain.Model.Category
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Змінити</h1>
+
+<h4>Категорія</h4>
+<hr />
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Редагування категорії</h2>
+        </div>
+        <div class="card-body">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mb-3">
+                        <img src="@Model.ImageUrl" alt="Current Category Image" width="150" />
+                    </div>
+                }
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Нове зображення</label>
+                    <input type="file" name="CategoryImage" class="form-control" accept="image/*" />
+                    <small class="form-text text-muted">
+                        Якщо не обирати, залишиться старе зображення.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Зберегти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Повернутися до списку</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

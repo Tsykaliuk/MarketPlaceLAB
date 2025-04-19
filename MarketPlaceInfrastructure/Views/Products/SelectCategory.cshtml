@@ -1,0 +1,82 @@
+﻿@model IEnumerable<MarketPlaceDomain.Model.Category>
+@{
+    ViewData["Title"] = "Вибір категорії";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold mb-3" style="color: #34495e;">Виберіть категорію</h1>
+        <p class="lead text-muted px-md-5">Будь ласка, вкажіть, до якої категорії належить товар, який ви хочете додати.</p>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
+        @foreach (var category in Model)
+        {
+            <a href="@Url.Action("Create", "Products", new { categoryId = category.Id })" class="category-pill-link shadow-sm">
+                   <i class="bi bi-tag-fill me-2"></i> 
+                @category.Name
+            </a>
+        }
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-outline-secondary rounded-pill px-4 py-2" asp-controller="Categories" asp-action="Index">
+            <i class="bi bi-arrow-left me-2"></i>Назад до списку категорій
+        </a>
+    </div>
+</div>
+
+<style>
+    .category-pill-link {
+        display: inline-block;
+        padding: 10px 24px;
+        border: 1px solid #dee2e6;
+        border-radius: 50px;
+        text-decoration: none;
+        color: #495057;
+        background-color: #ffffff;
+        font-weight: 500;
+        font-size: 1.2rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+        .category-pill-link:hover {
+            background-color: #EB5757;
+            color: #ffffff;
+            border-color: #EB5757;
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 15px rgba(235, 87, 87, 0.25) !important;
+        }
+
+    h1.display-5 {
+        font-weight: 600 !important;
+    }
+
+    .lead {
+        font-size: 1.2rem;
+        color: #6c757d !important;
+    }
+
+    .btn-outline-secondary {
+        border-width: 1px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+    @@media (max-width: 768px) {
+        h1.display-5 {
+            font-size: 2.2rem;
+        }
+
+        .lead {
+            font-size: 1rem;
+        }
+    }
+</style>

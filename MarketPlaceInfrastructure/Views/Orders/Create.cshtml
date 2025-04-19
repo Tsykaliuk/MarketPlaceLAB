@@ -1,0 +1,93 @@
+﻿@model OrderCreateViewModel
+@{
+    ViewData["Title"] = "Оформлення замовлення";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <h1 class="text-center mb-4">@ViewData["Title"]</h1>
+
+            <div class="card shadow-sm">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="@(Model.ProductImageUrl ?? "/images/noimage.jpeg")" class="img-fluid rounded-start" alt="@Model.ProductName" style="object-fit: cover; height: 100%; min-height: 200px;">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h4 class="card-title">@Model.ProductName</h4>
+                            <p class="card-text text-muted">Ціна за одиницю: <strong>@Model.ProductPrice.ToString("N2") ₴</strong></p>
+                            <p class="card-text"><small class="text-success">Доступно: @Model.MaxQuantity од.</small></p>
+
+                            <hr />
+
+                            <form asp-action="Create" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" asp-for="ProductId" />
+
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                                <div class="row g-3 align-items-end mb-3">
+                                    <div class="col-md-4">
+                                        <label asp-for="Quantity" class="form-label fw-semibold"></label>
+                                        <input asp-for="Quantity" type="number" min="1" max="@Model.MaxQuantity" class="form-control" id="quantityInput" />
+                                        <span asp-validation-for="Quantity" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h5>Загальна сума: <span id="totalPriceDisplay" class="text-danger fw-bold">@((Model.ProductPrice * Model.Quantity).ToString("N2")) ₴</span></h5>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-outline-secondary">Скасувати</a>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-lg me-2"></i>Підтвердити замовлення
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const quantityInput = document.getElementById('quantityInput');
+            const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+            const unitPrice = parseFloat('@Model.ProductPrice.ToString("F2").Replace(",", ".")'); // Передаємо ціну з моделі
+            const maxQuantity = parseInt('@Model.MaxQuantity');
+
+            function calculateTotal() {
+                let quantity = parseInt(quantityInput.value);
+
+                if (isNaN(quantity) || quantity < 1) {
+                    quantity = 1;
+                    quantityInput.value = 1; // Виправляємо значення в полі
+                } else if (quantity > maxQuantity) {
+                     quantity = maxQuantity;
+                     quantityInput.value = maxQuantity; // Виправляємо значення в полі
+                }
+
+
+                if (!isNaN(unitPrice) && quantity >= 1) {
+                    const total = (unitPrice * quantity).toFixed(2);
+                    totalPriceDisplay.textContent = total.replace('.', ',') + ' ₴'; // Відображаємо з комою
+                } else {
+                     totalPriceDisplay.textContent = '--- ₴';
+                }
+            }
+
+            if (quantityInput && totalPriceDisplay && !isNaN(unitPrice)) {
+                quantityInput.addEventListener('input', calculateTotal);
+                calculateTotal();
+            }
+        });
+    </script>
+}

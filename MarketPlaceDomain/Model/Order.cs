@@ -5,19 +5,12 @@ namespace MarketPlaceDomain.Model;
 
 public partial class Order : Entity
 {
-    public int? UserId { get; set; }
-
-    public int ProductId { get; set; }
-
+    public string UserId { get; set; } = null!;
+    public string ProductId { get; set; } = null!;
     public int Quantity { get; set; }
-
     public decimal TotalPrice { get; set; }
-
-    public string Status { get; set; } = null!;
-
-    public DateTime? CreatedAt { get; set; }
-
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public virtual Product Product { get; set; } = null!;
-
-    public virtual User? User { get; set; }
+    public virtual ApplicationUser User { get; set; } = null!;
 }
