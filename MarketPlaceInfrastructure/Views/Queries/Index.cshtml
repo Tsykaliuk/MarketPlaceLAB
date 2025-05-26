@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Меню запитів";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Оберіть запит для виконання:</p>
+
+<div class="list-group">
+    <a asp-action="ProductsInCategoryPriceAbove" class="list-group-item list-group-item-action">1. Товари в категорії з ціною вище X</a>
+    <a asp-action="UserOrdersAfterDate" class="list-group-item list-group-item-action">2. Замовлення користувача (покупця) після дати Y</a>
+    <a asp-action="ProductsOrderedByUserMoreThanNTimes" class="list-group-item list-group-item-action">3. Товари, які користувач (покупець) замовляв більше N разів</a>
+    <a asp-action="ProductsInCategoryOrderedMinTimes" class="list-group-item list-group-item-action">4. Товари з категорії, замовлені щонайменше N разів</a>    <a asp-action="TotalOrderValueByProductInDateRange" class="list-group-item list-group-item-action">5. Загальна вартість замовлень по кожному товару за період</a>
+    <hr />
+    <h5 class="mt-3">Запити з множинними порівняннями:</h5>
+    <a asp-action="SellersWithSameCategorySet" class="list-group-item list-group-item-action">6. Продавці з таким же набором категорій товарів, як у продавця X</a>
+    <a asp-action="UsersOrderedFromAllCategories" class="list-group-item list-group-item-action">7. Користувачі (покупці), що замовляли товари з усіх існуючих категорій</a>
+    <a asp-action="SellerPairsSellingInSameCategories" class="list-group-item list-group-item-action">8. Пари продавців, які продають товари принаймні в одній спільній категорії</a>
+</div>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">Повернутись до головного меню</a>

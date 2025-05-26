@@ -1,0 +1,69 @@
+﻿@model MarketPlaceInfrastructure.Controllers.SellerPairsSellingInSameCategoriesViewModel
+@{
+    ViewData["Title"] = "Пари продавців зі спільними категоріями";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Цей запит показує пари продавців, які продають товари принаймні в одній і тій самій категорії.</p>
+
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="text-danger"></div>
+}
+
+@if (Model.Results != null)
+{
+    <h3 class="mt-4">Результати запиту:</h3>
+    @if (Model.Results.Any())
+    {
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Продавець 1</th>
+                    <th>Продавець 2</th>
+                    <th>Спільні категорії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pair in Model.Results)
+                {
+                    <tr>
+                        <td>@pair.Seller1Name</td>
+                        <td>@pair.Seller2Name</td>
+                        <td>
+                            @if (pair.SharedCategoryNames.Any())
+                            {
+                                <ul>
+                                    @foreach (var categoryName in pair.SharedCategoryNames)
+                                    {
+                                        <li>@categoryName</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <text>Немає спільних категорій (це не повинно трапитися згідно логіки запиту)</text>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="mt-3">Не знайдено пар продавців, які б продавали товари в спільних категоріях.</p>
+    }
+}
+else if (ViewData.ModelState.IsValid)
+{
+    <p class="mt-3">Результати запиту будуть відображені тут (запит виконується автоматично при завантаженні сторінки).</p>
+}
+
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-info">До меню запитів</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Повернутись до головного меню</a>
+</div>
+

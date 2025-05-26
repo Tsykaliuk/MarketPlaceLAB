@@ -1,0 +1,52 @@
+﻿@model MarketPlaceInfrastructure.Controllers.UsersOrderedFromAllCategoriesViewModel
+@{
+    ViewData["Title"] = "Користувачі, що замовляли з усіх категорій";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Цей запит показує користувачів, які зробили замовлення товарів принаймні з кожної існуючої в системі категорії.</p>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="text-danger"></div>
+}
+
+@if (Model.Results != null)
+{
+    <h3 class="mt-4">Результати запиту:</h3>
+    @if (Model.Results.Any())
+    {
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>ID Користувача</th>
+                    <th>Ім'я користувача</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Results)
+                {
+                    <tr>
+                        <td>@user.UserId</td>
+                        <td>@user.UserName</td>
+                        <td>@user.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="mt-3">Не знайдено користувачів, які б замовляли товари з усіх категорій.</p>
+    }
+}
+else if (ViewData.ModelState.IsValid)
+{
+    <p class="mt-3">Результати будуть відображені тут.</p>
+}
+
+
+<a asp-action="Index" class="btn btn-info mt-3">До меню запитів</a>
+<a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">Повернутись до головного меню</a>

@@ -1,0 +1,79 @@
+﻿@model MarketPlaceInfrastructure.Controllers.ProductsInCategoryOrderedMinTimesViewModel
+@{
+    ViewData["Title"] = "Товари з категорії, замовлені щонайменше N разів";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Оберіть категорію та мінімальну кількість замовлень для пошуку товарів.</p>
+
+<form asp-action="ProductsInCategoryOrderedMinTimes" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="SelectedCategoryId" class="control-label"></label>
+        <select asp-for="SelectedCategoryId" asp-items="Model.Categories" class="form-control">
+            <option value="">-- Оберіть категорію --</option>
+        </select>
+        <span asp-validation-for="SelectedCategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="MinOrderCount" class="control-label"></label>
+        <input asp-for="MinOrderCount" type="number" class="form-control" />
+        <span asp-validation-for="MinOrderCount" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Знайти товари" class="btn btn-primary" />
+    </div>
+</form>
+
+@if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0 && Model.Results == null)
+{
+    <div asp-validation-summary="All" class="text-danger mt-3"></div>
+}
+
+@if (Model.Results != null)
+{
+    <h3 class="mt-4">Результати запиту:</h3>
+    @if (Model.Results.Any())
+    {
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>ID Товару</th>
+                    <th>Назва товару</th>
+                    <th>Категорія</th>
+                    <th>Кількість замовлень</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Results)
+                {
+                    <tr>
+                        <td>@item.ProductId</td>
+                        <td>@item.ProductTitle</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.ActualOrderCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="mt-3">За вашим запитом нічого не знайдено.</p>
+    }
+}
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-info">До меню запитів</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Повернутись до головного меню</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
